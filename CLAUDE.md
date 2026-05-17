@@ -90,3 +90,4 @@ LLM_MODEL=google/gemini-3.1-flash-lite
 ## Skills
 
 При продуктовых решениях: read .claude/skills/product-thinking.md
+Для любого UI: read .claude/skills/frontend-design.md
