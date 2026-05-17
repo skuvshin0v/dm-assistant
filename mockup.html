@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DM Assistant — Visual Style Mockup v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  /* ─── Tokens ─── */
+  :root {
+    --bg:          #090908;
+    --surface:     #0d0d0c;
+    --surface-2:   #131312;
+    --border:      rgba(255,255,255,0.07);
+    --border-mid:  rgba(255,255,255,0.11);
+    --gold:        #c4943a;
+    --gold-dim:    rgba(196,148,58,0.4);
+    --gold-faint:  rgba(196,148,58,0.12);
+    --cream:       #f0ece0;
+    --text:        #e4dfd0;
+    --text-muted:  #6e6a60;
+    --text-faint:  #302e28;
+    --danger:      #8c2030;
+    --radius:      8px;
+    --radius-lg:   12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── Noise overlay ─── */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── Typography ─── */
+  h1, h2, h3, h4, h5 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  /* ─── Mono ─── */
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8em;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── Section label ─── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 36px;
+  }
+  .section-label::before {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 20px;
+    background: var(--gold-dim);
+  }
+
+  /* ─── Buttons ─── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--cream);
+    color: #0a0a09;
+  }
+  .btn-primary:hover {
+    background: #fff;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-mid);
+  }
+  .btn-ghost:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,0.2);
+  }
+  .btn-danger {
+    background: rgba(140,32,48,0.15);
+    color: #c07080;
+    border: 1px solid rgba(140,32,48,0.3);
+  }
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  /* ─── Cards ─── */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 24px;
+  }
+  .card-accent {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(196,148,58,0.22);
+    padding: 24px;
+  }
+
+  /* ─── Badge ─── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+  .badge-gold {
+    background: var(--gold-faint);
+    color: var(--gold);
+    border: 1px solid rgba(196,148,58,0.2);
+  }
+  .badge-neutral {
+    background: var(--surface-2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ─── Entity tags ─── */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tag-npc  { background: rgba(90,120,190,0.1);  color: #7a9fd4; border: 1px solid rgba(90,120,190,0.18); }
+  .tag-loc  { background: rgba(70,150,90,0.1);   color: #6db885; border: 1px solid rgba(70,150,90,0.18); }
+  .tag-item { background: var(--gold-faint);      color: var(--gold); border: 1px solid rgba(196,148,58,0.2); }
+  .tag-fact { background: rgba(140,32,48,0.1);   color: #c07080; border: 1px solid rgba(140,32,48,0.2); }
+
+  /* ─── Page wrapper ─── */
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 40px; }
+
+  /* ═══════════════════════════════
+     HEADER
+  ═══════════════════════════════ */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(9,9,8,0.88);
+    backdrop-filter: blur(16px);
+  }
+  .logo {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+  }
+  .logo-mark {
+    width: 26px;
+    height: 26px;
+    border: 1px solid rgba(196,148,58,0.35);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+  }
+  nav { display: flex; align-items: center; gap: 4px; }
+  nav a {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 7px 14px;
+    border-radius: var(--radius);
+    transition: color 0.15s;
+  }
+  nav a:hover { color: var(--text); }
+
+  /* ═══════════════════════════════
+     HERO
+  ═══════════════════════════════ */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 60px;
+    align-items: center;
+    padding: 96px 40px 80px;
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 4.5vw, 62px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    margin: 14px 0 22px;
+    color: var(--text);
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+  .hero p {
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.7;
+    max-width: 440px;
+    margin-bottom: 32px;
+  }
+  .hero-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* Rune */
+  .hero-rune {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.65;
+  }
+  .hero-rune svg { width: 340px; height: 340px; }
+  .rune-outer { animation: spin 100s linear infinite; transform-origin: center; }
+  .rune-inner { animation: spin 65s linear infinite reverse; transform-origin: center; }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* ═══════════════════════════════
+     FEATURES
+  ═══════════════════════════════ */
+  .features {
+    padding: 20px 40px 72px;
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .feature-icon {
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold);
+    margin-bottom: 18px;
+    background: var(--surface-2);
+  }
+  .feature-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .feature-card p {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ═══════════════════════════════
+     APP SHELL
+  ═══════════════════════════════ */
+  .ui-preview {
+    padding: 0 40px 80px;
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+  .app-shell {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-mid);
+    background: var(--surface);
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 520px;
+  }
+  .app-sidebar {
+    border-right: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .sidebar-header {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-header strong {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+    letter-spacing: -0.01em;
+  }
+  .sidebar-header span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.03em;
+  }
+  .sidebar-section {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding: 16px 16px 5px;
+  }
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.12s;
+    position: relative;
+  }
+  .sidebar-item svg { opacity: 0.5; flex-shrink: 0; }
+  .sidebar-item:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+  .sidebar-item:hover svg { opacity: 0.7; }
+  .sidebar-item.active {
+    color: var(--text);
+    background: rgba(196,148,58,0.06);
+  }
+  .sidebar-item.active svg { opacity: 1; color: var(--gold); }
+  .sidebar-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 6px; bottom: 6px;
+    width: 2px;
+    background: var(--gold);
+    border-radius: 0 2px 2px 0;
+  }
+  .sidebar-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    flex-shrink: 0;
+  }
+  .sidebar-dot.active { background: var(--gold); }
+
+  .app-main {
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+  }
+  .app-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .breadcrumb {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 3px;
+  }
+  .breadcrumb span { color: var(--text-muted); }
+
+  .chat-area {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .msg {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .msg-avatar.user {
+    background: var(--surface-2);
+    border: 1px solid var(--border-mid);
+    color: var(--text-muted);
+  }
+  .msg-avatar.ai {
+    background: var(--gold-faint);
+    border: 1px solid rgba(196,148,58,0.22);
+    color: var(--gold);
+  }
+  .msg-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 5px;
+  }
+  .msg-text {
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.65;
+  }
+  .msg-text.ai { color: #ccc5b0; }
+  .msg-text strong { color: var(--text); font-weight: 500; }
+  .msg-text em { font-style: italic; color: var(--text-muted); }
+
+  .chat-input-wrap {
+    padding: 0 24px 20px;
+  }
+  .chat-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius);
+    padding: 11px 15px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .chat-input:focus { border-color: rgba(196,148,58,0.35); }
+  .chat-input::placeholder { color: var(--text-faint); }
+
+  /* ═══════════════════════════════
+     SHOWCASE
+  ═══════════════════════════════ */
+  .showcase {
+    padding: 0 40px 100px;
+    max-width: 1160px;
+    margin: 0 auto;
+  }
+  .showcase-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .showcase-block {
+    padding: 24px;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+  }
+  .block-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 18px;
+  }
+  .items { display: flex; flex-direction: column; gap: 10px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  /* Color swatches */
+  .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .swatch {
+    border-radius: 6px;
+    height: 44px;
+    display: flex;
+    align-items: flex-end;
+    padding: 4px 6px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .swatch span { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: rgba(255,255,255,0.4); }
+
+  /* Type scale */
+  .t-h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .t-h2 { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+  .t-h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
+  .t-body { font-size: 16px; font-weight: 400; line-height: 1.65; }
+  .t-small { font-size: 14px; font-weight: 300; color: var(--text-muted); }
+  .t-mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 56px 40px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═════════════════════════════════
+     HEADER
+═════════════════════════════════ -->
+<header>
+  <a href="#" class="logo">
+    <div class="logo-mark">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <polygon points="7,0.5 9,5 13.5,5.5 10.5,8.5 11.5,13.5 7,11 2.5,13.5 3.5,8.5 0.5,5.5 5,5"
+                 stroke="currentColor" stroke-width="1.1" fill="none"/>
+      </svg>
+    </div>
+    DM Assistant
+  </a>
+  <nav>
+    <a href="#">Возможности</a>
+    <a href="#">Как работает</a>
+    <a href="#">Тарифы</a>
+    <a href="#" style="color:var(--text-muted);margin-left:4px;">Войти</a>
+    <a href="#" class="btn btn-primary btn-sm" style="margin-left:8px;">Начать бесплатно</a>
+  </nav>
+</header>
+
+<!-- ═════════════════════════════════
+     HERO
+═════════════════════════════════ -->
+<section class="hero">
+  <div>
+    <div class="section-label">Для Мастеров Подземелий</div>
+    <h1>AI, который знает<br>твой <em>мир</em></h1>
+    <p>
+      Записываешь один раз — AI помнит всегда. Находит нужное, генерирует идеи в логике твоей кампании.
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Начать бесплатно</a>
+      <a href="#" class="btn btn-ghost">Посмотреть демо</a>
+    </div>
+  </div>
+  <div class="hero-rune">
+    <svg viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Static outer ring -->
+      <circle cx="170" cy="170" r="162" stroke="rgba(196,148,58,0.1)" stroke-width="1"/>
+
+      <!-- Rotating outer -->
+      <g class="rune-outer">
+        <polygon points="170,10 322,118 264,302 76,302 18,118"
+                 stroke="rgba(196,148,58,0.16)" stroke-width="0.8" fill="none"/>
+        <polygon points="170,10 76,302 322,118 18,118 264,302"
+                 stroke="rgba(196,148,58,0.12)" stroke-width="0.6" fill="none"/>
+        <circle cx="170" cy="170" r="130" stroke="rgba(196,148,58,0.08)" stroke-width="0.5" stroke-dasharray="3 7"/>
+      </g>
+
+      <!-- Rotating inner (reverse) -->
+      <g class="rune-inner">
+        <polygon points="170,66 253,132 224,228 116,228 87,132"
+                 stroke="rgba(196,148,58,0.18)" stroke-width="0.8" fill="none"/>
+        <circle cx="170" cy="170" r="70" stroke="rgba(196,148,58,0.1)" stroke-width="0.6"/>
+      </g>
+
+      <!-- Static center -->
+      <circle cx="170" cy="170" r="22" stroke="rgba(196,148,58,0.35)" stroke-width="0.8"/>
+      <circle cx="170" cy="170" r="5" fill="rgba(196,148,58,0.55)"/>
+      <line x1="170" y1="148" x2="170" y2="138" stroke="rgba(196,148,58,0.3)" stroke-width="0.8"/>
+      <line x1="170" y1="192" x2="170" y2="202" stroke="rgba(196,148,58,0.3)" stroke-width="0.8"/>
+      <line x1="148" y1="170" x2="138" y2="170" stroke="rgba(196,148,58,0.3)" stroke-width="0.8"/>
+      <line x1="192" y1="170" x2="202" y2="170" stroke="rgba(196,148,58,0.3)" stroke-width="0.8"/>
+
+      <!-- Cardinal ticks -->
+      <g stroke="rgba(196,148,58,0.2)" stroke-width="0.7">
+        <line x1="170" y1="4"   x2="170" y2="12"/>
+        <line x1="170" y1="328" x2="170" y2="336"/>
+        <line x1="4"   y1="170" x2="12"  y2="170"/>
+        <line x1="328" y1="170" x2="336" y2="170"/>
+      </g>
+      <circle cx="170" cy="8" r="2.5" fill="rgba(196,148,58,0.45)"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════
+     FEATURES
+═════════════════════════════════ -->
+<section class="features">
+  <div class="section-label">Что умеет</div>
+  <div class="features-grid">
+
+    <div class="card feature-card">
+      <div class="feature-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="3" y="2" width="12" height="14" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M6 6h6M6 9h6M6 12h4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Само запоминает</h3>
+      <p>Вставил заметки — AI разобрал NPC и локации, подтвердил — мир наполнен.</p>
+    </div>
+
+    <div class="card feature-card">
+      <div class="feature-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.2"/>
+          <path d="M12 12l3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <h3>Знает твой мир</h3>
+      <p>«Кто такой Варрен?» — AI отвечает точно, с деталями из твоих записей.</p>
+    </div>
+
+    <div class="card feature-card">
+      <div class="feature-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 1.5l1.7 5H16l-4.2 3 1.6 5L9 12 5.6 14.5l1.6-5L3 6.5h5.3L9 1.5z"
+                stroke="currentColor" stroke-width="1.1" fill="none"/>
+        </svg>
+      </div>
+      <h3>Идеи в стиле мира</h3>
+      <p>Попросил квест — получил идеи с именами из твоей кампании.</p>
+    </div>
+
+  </div>
+</section>
+
+<hr>
+
+<!-- ═════════════════════════════════
+     APP UI PREVIEW
+═════════════════════════════════ -->
+<section class="ui-preview">
+  <div class="section-label">Как выглядит внутри</div>
+  <div class="app-shell">
+
+    <!-- Sidebar -->
+    <div class="app-sidebar">
+      <div class="sidebar-header">
+        <strong>Кампания Забытых</strong>
+        <span>13 сессий · 47 сущностей</span>
+      </div>
+
+      <div class="sidebar-section">Инструменты</div>
+      <div class="sidebar-item active">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M2 3.5h10M2 7h10M2 10.5h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        Чат с Оракулом
+      </div>
+      <div class="sidebar-item">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="1.5" y="1.5" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.1"/>
+          <path d="M4 5h6M4 7.5h6M4 10h3.5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        Канон мира
+      </div>
+      <div class="sidebar-item">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.1"/>
+          <path d="M7 4v3.2l2 1.3" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+        История сессий
+      </div>
+      <div class="sidebar-item">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M7 1l1.6 4.8H13L9.2 8.6l1.5 4.9L7 10.8 3.3 13.5l1.5-4.9L1 5.8h4.4L7 1z"
+                stroke="currentColor" stroke-width="1.1" fill="none"/>
+        </svg>
+        Идеи
+      </div>
+
+      <div class="sidebar-section" style="margin-top:8px;">Миры</div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot active"></div>
+        Кампания Забытых
+      </div>
+      <div class="sidebar-item">
+        <div class="sidebar-dot"></div>
+        Тёмные Берега
+      </div>
+    </div>
+
+    <!-- Main -->
+    <div class="app-main">
+      <div class="app-topbar">
+        <div>
+          <div class="breadcrumb">
+            <span>Кампания Забытых</span>
+            <span style="color:var(--text-faint)">/</span>
+            <span>Оракул</span>
+          </div>
+          <h2 style="font-size:17px;font-weight:600;">Чат с Оракулом</h2>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span class="badge badge-gold">● В сети</span>
+          <button class="btn btn-ghost btn-sm">47 сущностей</button>
+        </div>
+      </div>
+
+      <div class="chat-area">
+        <div class="msg">
+          <div class="msg-avatar user">Д</div>
+          <div>
+            <div class="msg-meta">Мастер</div>
+            <div class="msg-text">Кто такой Варрен и почему он ненавидит Гильдию Торговцев?</div>
+          </div>
+        </div>
+
+        <div class="msg">
+          <div class="msg-avatar ai">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <polygon points="6.5,0.5 8,4.8 12.5,5.2 9.5,8 10.5,12.5 6.5,10.2 2.5,12.5 3.5,8 0.5,5.2 5,4.8"
+                       stroke="currentColor" stroke-width="1" fill="none"/>
+            </svg>
+          </div>
+          <div>
+            <div class="msg-meta">Оракул</div>
+            <div class="msg-text ai">
+              <span class="tag tag-npc" style="margin-right:6px;margin-bottom:10px;display:inline-flex;">NPC</span>
+              <br><br>
+              <strong>Варрен Хальт</strong> — бывший торговец из Серебряного квартала, разорённый Гильдией в 1147 году. Гильдия намеренно обвалила цены на кожу, вынудив независимых торговцев продавать запасы в убыток.<br><br>
+              Варрен потерял склад и дом. С тех пор живёт в Нижних доках, <em>работает информатором для Воров</em>. Его племянница Лайра до сих пор служит в Гильдии — скрытая точка давления.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-wrap">
+        <input class="chat-input" placeholder="Спроси об этом мире…">
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ═════════════════════════════════
+     COMPONENT SHOWCASE
+═════════════════════════════════ -->
+<section class="showcase">
+  <div class="section-label">Компоненты</div>
+  <div class="showcase-grid">
+
+    <!-- Typography -->
+    <div class="showcase-block" style="grid-column:1/3;">
+      <div class="block-label">Typography — DM Sans</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div class="t-h1">Заголовок первого уровня</div>
+        <div class="t-h2">Заголовок второго уровня</div>
+        <div class="t-h3">Заголовок третьего уровня</div>
+        <div class="t-body">Основной текст. Читается легко при любом размере. DM Sans — достаточно нейтральный, чтобы не мешать контенту, достаточно уникальный, чтобы не сливаться с Inter.</div>
+        <div class="t-small">Вспомогательный текст меньшего размера. Для описаний, подписей, мета-данных сущностей.</div>
+        <div class="t-mono">mono / 2026-05-18 / SESSION_13 / campaign_id: c8f2a1</div>
+      </div>
+    </div>
+
+    <!-- Colors -->
+    <div class="showcase-block">
+      <div class="block-label">Цвета</div>
+      <div class="swatches">
+        <div class="swatch" style="background:#090908"><span>#090908</span></div>
+        <div class="swatch" style="background:#0d0d0c"><span>#0d0d0c</span></div>
+        <div class="swatch" style="background:#f0ece0"><span>#f0ece0</span></div>
+        <div class="swatch" style="background:#e4dfd0"><span>#e4dfd0</span></div>
+        <div class="swatch" style="background:#c4943a"><span>#c4943a</span></div>
+        <div class="swatch" style="background:#6e6a60"><span>#6e6a60</span></div>
+        <div class="swatch" style="background:#7a9fd4"><span>#7a9fd4</span></div>
+        <div class="swatch" style="background:#6db885"><span>#6db885</span></div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="showcase-block">
+      <div class="block-label">Кнопки</div>
+      <div class="items">
+        <div class="row">
+          <button class="btn btn-primary">Начать</button>
+          <button class="btn btn-ghost">Отмена</button>
+          <button class="btn btn-danger">Удалить</button>
+        </div>
+        <div class="row">
+          <button class="btn btn-primary btn-sm">Начать</button>
+          <button class="btn btn-ghost btn-sm">Отмена</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Badges & Tags -->
+    <div class="showcase-block">
+      <div class="block-label">Бейджи и теги</div>
+      <div class="items">
+        <div class="row">
+          <span class="badge badge-gold">● Активно</span>
+          <span class="badge badge-neutral">Черновик</span>
+        </div>
+        <div class="row">
+          <span class="tag tag-npc">NPC</span>
+          <span class="tag tag-loc">Локация</span>
+          <span class="tag tag-item">Предмет</span>
+          <span class="tag tag-fact">Факт</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Entity cards -->
+    <div class="showcase-block" style="grid-column:1/-1;">
+      <div class="block-label">Карточки сущностей</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;">
+        <div class="card-accent">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <span class="tag tag-npc">NPC</span>
+            <span class="mono" style="color:var(--text-faint);font-size:10px;">ред. 3 дня назад</span>
+          </div>
+          <div style="font-size:16px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em;">Варрен Хальт</div>
+          <div style="font-size:14px;font-weight:300;color:var(--text-muted);line-height:1.6;">Бывший торговец кожей. Живёт в Нижних доках. Информатор Воров.</div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <span class="tag tag-loc">Локация</span>
+            <span class="mono" style="color:var(--text-faint);font-size:10px;">ред. неделю назад</span>
+          </div>
+          <div style="font-size:16px;font-weight:600;margin-bottom:6px;letter-spacing:-0.01em;">Таверна «Три свечи»</div>
+          <div style="font-size:14px;font-weight:300;color:var(--text-muted);line-height:1.6;">Место встречи торговцев. Хозяйка — Мирна. Подвал с тайным входом.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div style="border-top:1px solid var(--border);text-align:center;padding:32px 40px;">
+  <span class="mono" style="color:var(--text-faint);letter-spacing:0.12em;">DM ASSISTANT · VISUAL STYLE MOCKUP v2 · 2026</span>
+</div>
+
+</body>
+</html>
