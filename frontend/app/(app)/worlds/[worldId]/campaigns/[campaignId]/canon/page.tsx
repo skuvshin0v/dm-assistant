@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { World, Campaign, Character, Location, Faction, Item, EntityType } from "@/lib/types";
-import Breadcrumb from "@/components/Breadcrumb";
 
 const SECTION_CONFIG: {
   type: EntityType;
@@ -184,35 +183,14 @@ export default async function CanonPage({
   const totalCount = Object.values(entityMap).reduce((sum, arr) => sum + arr.length, 0);
 
   return (
-    <div className="space-y-8">
-      <Breadcrumb
-        items={[
-          { label: "Миры", href: "/worlds" },
-          { label: (world as World).name, href: `/worlds/${worldId}/campaigns` },
-          {
-            label: (campaign as Campaign).name,
-            href: `/worlds/${worldId}/campaigns/${campaignId}/chats`,
-          },
-          { label: "Канон" },
-        ]}
-      />
-
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Канон мира</h1>
-          {!allEmpty && (
-            <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
-              {totalCount} {totalCount === 1 ? "сущность" : totalCount < 5 ? "сущности" : "сущностей"}
-            </p>
-          )}
-        </div>
-        <Link
-          href={`/worlds/${worldId}/campaigns/${campaignId}/chats`}
-          className="px-4 py-2 rounded-lg text-sm border transition-colors hover:bg-white/5"
-          style={{ borderColor: "var(--border)", color: "var(--muted)" }}
-        >
-          💬 Чаты
-        </Link>
+    <div className="space-y-8 px-8 py-8">
+      <div>
+        <h1 className="text-2xl font-bold">Канон мира</h1>
+        {!allEmpty && (
+          <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
+            {totalCount} {totalCount === 1 ? "сущность" : totalCount < 5 ? "сущности" : "сущностей"}
+          </p>
+        )}
       </div>
 
       {allEmpty ? (

@@ -100,6 +100,10 @@ type Props = { worldId: string; campaignId: string; chatId: string };
 export default function ChatWindow({ worldId, campaignId, chatId }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
+
+  useEffect(() => {
+    document.cookie = `last_chat_url=/worlds/${worldId}/campaigns/${campaignId}/chats/${chatId}; path=/; max-age=${60 * 60 * 24 * 30}`;
+  }, [worldId, campaignId, chatId]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [accepted, setAccepted] = useState<Set<number>>(new Set());

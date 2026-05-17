@@ -1,21 +1,40 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const lastChat = user ? (cookieStore.get("last_chat_url")?.value ?? "/worlds") : null;
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", color: "var(--foreground)" }}>
       <header className="flex items-center justify-between px-8 py-5 border-b" style={{ borderColor: "var(--border)" }}>
         <span className="text-lg font-semibold tracking-tight">⚔️ DM Assistant</span>
         <div className="flex gap-4 text-sm">
-          <Link href="/login" className="px-4 py-2 rounded-md transition-colors" style={{ color: "var(--muted)" }}>
-            Войти
-          </Link>
-          <Link
-            href="/register"
-            className="px-4 py-2 rounded-md text-white font-medium transition-colors"
-            style={{ background: "var(--primary)" }}
-          >
-            Начать бесплатно
-          </Link>
+          {user ? (
+            <Link
+              href={lastChat!}
+              className="px-4 py-2 rounded-md text-white font-medium transition-colors"
+              style={{ background: "var(--primary)" }}
+            >
+              Открыть приложение
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="px-4 py-2 rounded-md transition-colors" style={{ color: "var(--muted)" }}>
+                Войти
+              </Link>
+              <Link
+                href="/register"
+                className="px-4 py-2 rounded-md text-white font-medium transition-colors"
+                style={{ background: "var(--primary)" }}
+              >
+                Начать бесплатно
+              </Link>
+            </>
+          )}
         </div>
       </header>
 
