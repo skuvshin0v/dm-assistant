@@ -1,8 +1,11 @@
-import json
 import os
 from typing import Any
 
 from openai import AsyncOpenAI
+from pydantic import BaseModel, field_validator
+
+PRICE_INPUT_RUB_PER_1M = 23.092
+PRICE_OUTPUT_RUB_PER_1M = 138.551
 
 SYSTEM_INSTRUCTION = """\
 Ты — аналитический ассистент мастера настольной RPG. Твоя задача — извлечь
@@ -131,33 +134,157 @@ SYSTEM_INSTRUCTION = """\
 """
 
 
+class CharacterSchema(BaseModel):
+    name: str
+    titles: list[str] = []
+    aliases: list[str] = []
+    role: str = "npc"
+    species: str | None = None
+    npc_kind: str | None = None
+    status: str | None = None
+    description: str | None = None
+    current_location_name: str | None = None
+    origin_location_name: str | None = None
+    affiliation_faction_names: list[str] = []
+    key_facts: list[str] = []
+
+    @field_validator("role", mode="before")
+    @classmethod
+    def v_role(cls, v: Any) -> str:
+        return v if v in {"player", "npc", "unknown"} else "npc"
+
+    @field_validator("npc_kind", mode="before")
+    @classmethod
+    def v_npc_kind(cls, v: Any) -> str | None:
+        valid = {"villain","boss","ally","patron","quest_giver","merchant","authority","commoner","rival","deity","other"}
+        return v if v in valid else None
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def v_status(cls, v: Any) -> str | None:
+        return v if v in {"alive", "dead", "unknown"} else None
+
+
+class LocationSchema(BaseModel):
+    name: str
+    description: str | None = None
+    status: str | None = None
+    level: str | None = None
+    subtype: str | None = None
+    terrain_type: str | None = None
+    parent_location_name: str | None = None
+    controlled_by_faction_name: str | None = None
+
+    @field_validator("level", mode="before")
+    @classmethod
+    def v_level(cls, v: Any) -> str | None:
+        valid = {"plane","world","continent","region","state","settlement","district","site","building","room"}
+        return v if v in valid else None
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def v_status(cls, v: Any) -> str | None:
+        return v if v in {"destroyed", "abandoned", "hidden", "unknown"} else None
+
+    @field_validator("terrain_type", mode="before")
+    @classmethod
+    def v_terrain(cls, v: Any) -> str | None:
+        valid = {"forest","swamp","mountains","hills","plains","desert","tundra","jungle","coast","island","river","lake","sea","ocean","cave","underdark","wasteland","volcanic","magical_anomaly"}
+        return v if v in valid else None
+
+
+class FactionSchema(BaseModel):
+    name: str
+    description: str | None = None
+    status: str | None = None
+    kind: str | None = None
+    scale: str | None = None
+    goals: list[str] = []
+    headquarters_location_name: str | None = None
+    leader_character_names: list[str] = []
+    relations: list[dict[str, Any]] = []
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def v_status(cls, v: Any) -> str | None:
+        return v if v in {"active", "disbanded", "underground", "unknown"} else None
+
+    @field_validator("kind", mode="before")
+    @classmethod
+    def v_kind(cls, v: Any) -> str | None:
+        valid = {"cult","guild","order","clan","dynasty","family","government","military","religious","criminal","merchant","secret_society","party","other"}
+        return v if v in valid else None
+
+    @field_validator("scale", mode="before")
+    @classmethod
+    def v_scale(cls, v: Any) -> str | None:
+        return v if v in {"local", "regional", "state", "world"} else None
+
+
+class ItemSchema(BaseModel):
+    name: str
+    description: str | None = None
+    status: str | None = None
+    kind: str = "item"
+    aliases: list[str] = []
+    key_facts: list[str] = []
+    held_by_party: bool = False
+    owner_character_name: str | None = None
+    owner_faction_name: str | None = None
+    current_location_name: str | None = None
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def v_status(cls, v: Any) -> str | None:
+        return v if v in {"active", "lost", "destroyed", "hidden", "unknown"} else None
+
+    @field_validator("kind", mode="before")
+    @classmethod
+    def v_kind(cls, v: Any) -> str:
+        return v if v in {"artifact", "item"} else "item"
+
+
+class LLMResult(BaseModel):
+    record_title: str
+    characters: list[CharacterSchema] = []
+    locations: list[LocationSchema] = []
+    factions: list[FactionSchema] = []
+    items: list[ItemSchema] = []
+
+
 def _build_user_message(text: str, existing_entities: list[dict[str, Any]]) -> str:
+    import json
     existing_json = json.dumps(existing_entities, ensure_ascii=False, indent=2)
     return f"{text}\n\nСуществующие сущности мира:\n{existing_json}"
 
 
-async def extract_entities(text: str, existing_entities: list[dict[str, Any]]) -> dict[str, Any]:
+async def extract_entities(
+    text: str, existing_entities: list[dict[str, Any]]
+) -> tuple[dict[str, Any], dict[str, Any]]:
     client = AsyncOpenAI(
         api_key=os.environ["LLM_API_KEY"],
         base_url=os.environ["LLM_BASE_URL"],
     )
     model = os.environ.get("LLM_MODEL", "google/gemini-3.1-flash-lite")
 
-    response = await client.chat.completions.create(
+    response = await client.beta.chat.completions.parse(
         model=model,
-        response_format={"type": "json_object"},
+        response_format=LLMResult,
         messages=[
             {"role": "system", "content": SYSTEM_INSTRUCTION},
             {"role": "user", "content": _build_user_message(text, existing_entities)},
         ],
     )
 
-    raw = response.choices[0].message.content or "{}"
-    result = json.loads(raw)
-    return {
-        "record_title": result.get("record_title", ""),
-        "characters": result.get("characters", []),
-        "factions": result.get("factions", []),
-        "locations": result.get("locations", []),
-        "items": result.get("items", []),
+    result: LLMResult = response.choices[0].message.parsed
+    usage = response.usage
+    input_tokens = usage.prompt_tokens if usage else 0
+    output_tokens = usage.completion_tokens if usage else 0
+    cost_rub = (input_tokens * PRICE_INPUT_RUB_PER_1M + output_tokens * PRICE_OUTPUT_RUB_PER_1M) / 1_000_000
+
+    usage_info = {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "cost_rub": round(cost_rub, 4),
     }
+    return result.model_dump(), usage_info

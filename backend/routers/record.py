@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Any, Literal
 from datetime import datetime, timezone
@@ -47,6 +48,9 @@ class RecordResponse(BaseModel):
     record_title: str
     proposals: list[Proposal]
     message_id: str
+    assistant_message_id: str
+    usage: dict
+    raw_llm: dict
 
 
 @router.post("/record", response_model=RecordResponse)
@@ -74,7 +78,7 @@ async def record(body: RecordRequest, user_id: str = Depends(get_user_id)):
     existing_for_llm = get_existing_for_llm(existing)
 
     # Extract entities via LLM
-    llm_result = await extract_entities(body.text, existing_for_llm)
+    llm_result, llm_usage = await extract_entities(body.text, existing_for_llm)
     record_title: str = llm_result.get("record_title", "")
 
     proposals: list[Proposal] = []
@@ -162,7 +166,38 @@ async def record(body: RecordRequest, user_id: str = Depends(get_user_id)):
             },
         ))
 
-    return RecordResponse(record_title=record_title, proposals=proposals, message_id=message_id)
+    if proposals:
+        assistant_content = json.dumps({
+            "type": "proposals",
+            "record_title": record_title,
+            "proposals": [p.model_dump() for p in proposals],
+            "message_id": message_id,
+            "original_text": body.text,
+            "usage": llm_usage,
+            "raw_llm": llm_result,
+        }, ensure_ascii=False)
+    else:
+        assistant_content = json.dumps({
+            "type": "empty",
+            "usage": llm_usage,
+            "raw_llm": llm_result,
+        })
+
+    asst_msg = await client.table("messages").insert({
+        "chat_id": body.chat_id,
+        "role": "assistant",
+        "content": assistant_content,
+    }).execute()
+    assistant_message_id: str = asst_msg.data[0]["id"]
+
+    return RecordResponse(
+        record_title=record_title,
+        proposals=proposals,
+        message_id=message_id,
+        assistant_message_id=assistant_message_id,
+        usage=llm_usage,
+        raw_llm=llm_result,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -175,6 +210,7 @@ class ConfirmRequest(BaseModel):
     campaign_id: str
     chat_id: str
     message_id: str
+    assistant_message_id: str | None = None
     original_text: str
 
 
@@ -376,7 +412,7 @@ async def confirm(body: ConfirmRequest, user_id: str = Depends(get_user_id)):
     # -----------------------------------------------------------------------
     # 6. Source
     # -----------------------------------------------------------------------
-    if body.accepted_proposals:
+    if body.accepted_proposals and body.message_id:
         await client.table("sources").insert({
             "world_id": body.world_id,
             "campaign_id": body.campaign_id,
@@ -386,5 +422,22 @@ async def confirm(body: ConfirmRequest, user_id: str = Depends(get_user_id)):
             "content": body.original_text,
             "visibility": "public",
         }).execute()
+
+    # Update assistant message to confirmed state
+    if body.assistant_message_id:
+        existing_msg = await client.table("messages").select("content").eq("id", body.assistant_message_id).maybe_single().execute()
+        existing_data: dict = {}
+        if existing_msg.data:
+            try:
+                existing_data = json.loads(existing_msg.data["content"])
+            except Exception:
+                pass
+        confirmed_content = json.dumps({
+            "type": "confirmed",
+            "actions": [p.model_dump() for p in body.accepted_proposals],
+            "usage": existing_data.get("usage"),
+            "raw_llm": existing_data.get("raw_llm"),
+        }, ensure_ascii=False)
+        await client.table("messages").update({"content": confirmed_content}).eq("id", body.assistant_message_id).execute()
 
     return ConfirmResponse(created_count=created_count)
