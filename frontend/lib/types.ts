@@ -29,3 +29,15 @@ export type Message = {
   content: string;
   created_at: string;
 };
+
+export type EntityType = "character" | "location" | "faction" | "item";
+
+export type Proposal = {
+  action: "create" | "update";
+  type: EntityType;
+  entity_id: string | null;
+  name: string;
+  description: string | null;
+  status: string | null;
+  data: Record<string, unknown>;
+};

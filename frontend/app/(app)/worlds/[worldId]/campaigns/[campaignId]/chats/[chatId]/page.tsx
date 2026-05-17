@@ -40,7 +40,7 @@ export default async function ChatPage({
           📚 Канон
         </a>
       </div>
-      <ChatWindow />
+      <ChatWindow worldId={worldId} campaignId={campaignId} chatId={chatId} />
     </div>
   );
 }

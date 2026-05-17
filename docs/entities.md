@@ -589,3 +589,96 @@ Location — не Faction (территория, а не агент), не Chara
 История изменений локации (status, subtype-переписывания, смены контроля) — через Events. Timeline места = обратный lookup по `Event.location_ids`. Никаких полей `previous_subtype` / `previous_status` / `previous_controlled_by` на Location.
 
 ---
+
+## Реализация — Итерация 2 (DB schema)
+
+> Концептуальная модель выше определяет смысл. Этот раздел — текущая схема в PostgreSQL.
+
+### Таблицы
+
+| Таблица | Концептуальная сущность | Миграция |
+|---------|------------------------|---------|
+| `characters` | Character | 002 |
+| `locations` | Location | 002 |
+| `factions` | Faction | 002 |
+| `items` | Item / Artifact | 002 |
+| `entity_relations` | Relations между сущностями | 002 |
+| `worlds`, `campaigns`, `chats`, `messages`, `sessions`, `sources`, `ideas` | инфраструктура | 001 |
+
+**Удалена:** `entities` (была в 001 как universal table — заменена типизированными таблицами).
+
+### characters
+
+| Поле | Тип | Заметки |
+|------|-----|---------|
+| `id` | uuid PK | |
+| `world_id` | uuid FK worlds | |
+| `name` | text | собственное имя без титула |
+| `description` | text\|null | внешность, манера |
+| `status` | text\|null | alive / dead / unknown |
+| `visibility` | text | public / gm_only |
+| `titles` | text[] | [«Барон»] — отдельно от имени |
+| `aliases` | text[] | прозвища |
+| `role` | text | player / npc / unknown |
+| `species` | text | human / elf / dragon / ... |
+| `npc_kind` | text\|null | villain / ally / commoner / ... |
+| `key_facts` | text[] | мотивы, история |
+| `current_location_id` | uuid\|null FK locations | где сейчас |
+| `origin_location_id` | uuid\|null FK locations | откуда родом |
+
+### locations
+
+| Поле | Тип | Заметки |
+|------|-----|---------|
+| `level` | text\|null | plane / state / settlement / building / room / ... |
+| `subtype` | text\|null | «город», «таверна», «башня» (свободный текст) |
+| `terrain_type` | text\|null | forest / mountains / sea / ... |
+| `parent_location_id` | uuid\|null FK self | прямой контейнер |
+| `controlled_by_faction_id` | uuid\|null FK factions | |
+
+### factions
+
+| Поле | Тип | Заметки |
+|------|-----|---------|
+| `kind` | text\|null | cult / guild / order / government / ... |
+| `scale` | text\|null | local / regional / state / world |
+| `goals` | text[] | |
+| `headquarters_location_id` | uuid\|null FK locations | |
+
+### items
+
+| Поле | Тип | Заметки |
+|------|-----|---------|
+| `kind` | text | artifact / item |
+| `aliases` | text[] | другие названия |
+| `key_facts` | text[] | магические свойства, история |
+| `held_by_party` | bool | |
+| `owner_character_id` | uuid\|null FK characters | |
+| `owner_faction_id` | uuid\|null FK factions | |
+| `current_location_id` | uuid\|null FK locations | |
+
+### entity_relations
+
+Единая таблица для всех типизированных связей. Заменяет отдельные junction-таблицы.
+
+| Поле | Тип | Заметки |
+|------|-----|---------|
+| `source_character_id` | uuid\|null FK characters | ровно один источник |
+| `source_faction_id` | uuid\|null FK factions | |
+| `target_character_id` | uuid\|null FK characters | ровно одна цель |
+| `target_faction_id` | uuid\|null FK factions | |
+| `target_location_id` | uuid\|null FK locations | |
+| `kind` | text | member_of / leads / allied / hostile / vassal / rival / serves / patron |
+| `note` | text\|null | |
+
+**Примеры:**
+- «Варрен состоит в Ордене Пепла» → `source_character=Варрен, target_faction=Орден, kind=member_of`
+- «Варрен возглавляет Орден» → `source_character=Варрен, target_faction=Орден, kind=leads`
+- «Орден враждует с Гильдией» → `source_faction=Орден, target_faction=Гильдия, kind=hostile`
+- «Орден служит Варрену» → `source_faction=Орден, target_character=Варрен, kind=serves`
+
+### Кросс-FK (circular references)
+
+`locations.controlled_by_faction_id` и `factions.headquarters_location_id` — циклическая зависимость. Решение: обе FK добавляются через `ALTER TABLE` после создания обеих таблиц (migration 002).
+
+---
