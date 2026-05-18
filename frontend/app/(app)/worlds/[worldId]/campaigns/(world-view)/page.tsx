@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { World, Campaign } from "@/lib/types";
 import CampaignCard from "@/components/CampaignCard";
+import Icon from "@/components/Icon";
 
 export default async function CampaignsPage({
   params,
@@ -44,7 +45,7 @@ export default async function CampaignsPage({
           className="rounded-xl border p-12 text-center"
           style={{ borderColor: "var(--border)", background: "var(--card)" }}
         >
-          <p className="text-4xl mb-4">📜</p>
+          <Icon name="scroll" className="mx-auto mb-4 h-10 w-10" />
           <p className="font-medium">Нет кампаний</p>
           <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
             Создай первую кампанию в этом мире

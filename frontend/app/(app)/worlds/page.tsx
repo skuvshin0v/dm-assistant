@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { World } from "@/lib/types";
 import Sidebar from "@/components/Sidebar";
 import WorldCard from "@/components/WorldCard";
+import Icon from "@/components/Icon";
 
 export default async function WorldsPage() {
   const supabase = await createClient();
@@ -32,7 +33,7 @@ export default async function WorldsPage() {
               className="rounded-xl border p-12 text-center"
               style={{ borderColor: "var(--border)", background: "var(--card)" }}
             >
-              <p className="text-4xl mb-4">🌍</p>
+              <Icon name="globe" className="mx-auto mb-4 h-10 w-10" />
               <p className="font-medium">Нет миров</p>
               <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
                 Создай первый мир, чтобы начать

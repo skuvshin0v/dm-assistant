@@ -1,12 +1,14 @@
 "use client";
 
+import type React from "react";
 import { Proposal, EntityType } from "@/lib/types";
+import Icon from "./Icon";
 
-const TYPE_ICON: Record<EntityType, string> = {
-  character: "👤",
-  location: "📍",
-  faction: "⚔️",
-  item: "🗡️",
+const TYPE_ICON: Record<EntityType, React.ComponentProps<typeof Icon>["name"]> = {
+  character: "user",
+  location: "map-pin",
+  faction: "sword",
+  item: "box",
 };
 
 const TYPE_LABEL: Record<EntityType, string> = {
@@ -102,7 +104,7 @@ export default function ProposalCard({ proposal, accepted, onToggle }: Props) {
         opacity: accepted ? 1 : 0.5,
       }}
     >
-      <span className="text-xl shrink-0 mt-0.5">{TYPE_ICON[proposal.type]}</span>
+      <Icon name={TYPE_ICON[proposal.type]} className="h-5 w-5 shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="font-semibold text-sm">{proposal.name}</span>
@@ -146,7 +148,14 @@ export default function ProposalCard({ proposal, accepted, onToggle }: Props) {
           color: accepted ? "var(--primary)" : "var(--muted)",
         }}
       >
-        {accepted ? "✓ Принят" : "Отклонён"}
+        {accepted ? (
+          <span className="inline-flex items-center gap-1">
+            <Icon name="check" className="h-3 w-3" />
+            Принят
+          </span>
+        ) : (
+          "Отклонён"
+        )}
       </button>
     </div>
   );

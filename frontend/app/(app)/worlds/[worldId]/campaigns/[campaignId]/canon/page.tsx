@@ -1,18 +1,20 @@
+import type React from "react";
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import type { World, Campaign, Character, Location, Faction, Item, EntityType } from "@/lib/types";
+import Icon from "@/components/Icon";
+import type { Character, Location, Faction, Item, EntityType } from "@/lib/types";
 
 const SECTION_CONFIG: {
   type: EntityType;
   label: string;
-  icon: string;
+  icon: React.ComponentProps<typeof Icon>["name"];
   emptyLabel: string;
 }[] = [
-  { type: "character", label: "Персонажи", icon: "👤", emptyLabel: "Персонажей нет" },
-  { type: "location", label: "Локации", icon: "📍", emptyLabel: "Локаций нет" },
-  { type: "faction", label: "Фракции", icon: "⚔️", emptyLabel: "Фракций нет" },
-  { type: "item", label: "Предметы", icon: "🗡️", emptyLabel: "Предметов нет" },
+  { type: "character", label: "Персонажи", icon: "user", emptyLabel: "Персонажей нет" },
+  { type: "location", label: "Локации", icon: "map-pin", emptyLabel: "Локаций нет" },
+  { type: "faction", label: "Фракции", icon: "sword", emptyLabel: "Фракций нет" },
+  { type: "item", label: "Предметы", icon: "box", emptyLabel: "Предметов нет" },
 ];
 
 type AnyEntity = { id: string; name: string; description: string | null; visibility: string; status?: string | null };
@@ -70,7 +72,10 @@ function EntityCard({ entity, type }: { entity: AnyEntity; type: EntityType }) {
               style={{ background: "#ef444422", color: "#ef4444" }}
               title="Только мастер"
             >
-              🔒 GM
+              <span className="inline-flex items-center gap-1">
+                <Icon name="lock" className="h-3 w-3" />
+                GM
+              </span>
             </span>
           )}
         </div>
@@ -108,14 +113,14 @@ function EntitySection({
 }: {
   type: EntityType;
   label: string;
-  icon: string;
+  icon: React.ComponentProps<typeof Icon>["name"];
   emptyLabel: string;
   entities: AnyEntity[];
 }) {
   return (
     <section className="space-y-3">
       <div className="flex items-center gap-2">
-        <span>{icon}</span>
+        <Icon name={icon} className="h-4 w-4" />
         <h2 className="font-semibold text-sm uppercase tracking-wider" style={{ color: "var(--muted)" }}>
           {label}
         </h2>
@@ -198,7 +203,7 @@ export default async function CanonPage({
           className="rounded-xl border p-16 text-center space-y-4"
           style={{ borderColor: "var(--border)", background: "var(--card)" }}
         >
-          <p className="text-5xl">📚</p>
+          <Icon name="book" className="mx-auto h-12 w-12" />
           <p className="font-semibold text-lg">Мир пока пустой</p>
           <p className="text-sm max-w-sm mx-auto" style={{ color: "var(--muted)" }}>
             Персонажи, локации, фракции и предметы появятся после первой записи в чате.

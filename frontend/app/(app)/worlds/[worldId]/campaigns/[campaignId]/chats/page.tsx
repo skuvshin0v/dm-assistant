@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Icon from "@/components/Icon";
 import { redirect } from "next/navigation";
 
 export default async function ChatsPage({
@@ -24,7 +25,7 @@ export default async function ChatsPage({
   return (
     <div className="flex items-center justify-center h-full">
       <div className="text-center space-y-3">
-        <p className="text-3xl">💬</p>
+        <Icon name="message" className="mx-auto h-8 w-8" />
         <p className="font-medium">Нет чатов</p>
         <p className="text-sm" style={{ color: "var(--muted)" }}>
           Создайте первый чат через панель слева

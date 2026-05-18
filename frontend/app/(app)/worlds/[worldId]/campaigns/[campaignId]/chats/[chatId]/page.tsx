@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import type { Chat } from "@/lib/types";
 import ChatWindow from "@/components/ChatWindow";
 
 export default async function ChatPage({
@@ -17,7 +16,12 @@ export default async function ChatPage({
 
   return (
     <div className="flex flex-col h-screen p-4">
-      <ChatWindow worldId={worldId} campaignId={campaignId} chatId={chatId} />
+      <ChatWindow
+        worldId={worldId}
+        campaignId={campaignId}
+        chatId={chatId}
+        chatTitle={chat.title ?? "Чат"}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import Icon from "./Icon";
 import LogoutButton from "./LogoutButton";
 
 export default function WorldsTopBar() {
@@ -19,7 +20,10 @@ export default function WorldsTopBar() {
       style={{ borderColor: "var(--border)", background: "var(--card)" }}
     >
       <Link href="/" className="font-semibold tracking-tight hover:opacity-80 transition-opacity">
-        ⚔️ DM Assistant
+        <span className="inline-flex items-center gap-2">
+          <Icon name="sword" className="h-4 w-4" />
+          DM Assistant
+        </span>
       </Link>
       <div className="flex items-center gap-3">
         {email && <span className="text-xs" style={{ color: "var(--muted)" }}>{email}</span>}

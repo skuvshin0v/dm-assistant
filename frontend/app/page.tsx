@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import Icon from "@/components/Icon";
 
 export default async function LandingPage() {
   const cookieStore = await cookies();
@@ -11,7 +12,10 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--background)", color: "var(--foreground)" }}>
       <header className="flex items-center justify-between px-8 py-5 border-b" style={{ borderColor: "var(--border)" }}>
-        <span className="text-lg font-semibold tracking-tight">⚔️ DM Assistant</span>
+        <span className="inline-flex items-center gap-2 text-lg font-semibold tracking-tight">
+          <Icon name="sword" className="h-5 w-5" />
+          DM Assistant
+        </span>
         <div className="flex gap-4 text-sm">
           {user ? (
             <Link
@@ -63,17 +67,17 @@ export default async function LandingPage() {
         <div className="mt-24 grid grid-cols-1 gap-6 sm:grid-cols-3 max-w-4xl w-full text-left">
           {[
             {
-              icon: "📝",
+              iconName: "edit" as const,
               title: "Само запоминает",
               desc: "Вставил заметки → AI разобрал NPC и локации → подтвердил → мир наполнен.",
             },
             {
-              icon: "🔍",
+              iconName: "search" as const,
               title: "Знает твой мир",
               desc: 'Написал "кто такой Варрен?" → AI ответил точно, с деталями из твоих записей.',
             },
             {
-              icon: "💡",
+              iconName: "lightbulb" as const,
               title: "Идеи в стиле мира",
               desc: "Попросил придумать квест → получил идеи с именами из твоей кампании.",
             },
@@ -83,7 +87,7 @@ export default async function LandingPage() {
               className="rounded-xl p-6 space-y-3 border"
               style={{ background: "var(--card)", borderColor: "var(--border)" }}
             >
-              <span className="text-3xl">{f.icon}</span>
+              <Icon name={f.iconName} className="h-8 w-8" />
               <h3 className="font-semibold text-lg">{f.title}</h3>
               <p className="text-sm leading-relaxed" style={{ color: "var(--muted)" }}>
                 {f.desc}

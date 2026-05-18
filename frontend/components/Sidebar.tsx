@@ -1,11 +1,13 @@
 "use client";
 
+import type React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import LogoutButton from "./LogoutButton";
 import NewChatButton from "./NewChatButton";
+import Icon from "./Icon";
 import type { Chat } from "@/lib/types";
 
 type RootMode = {
@@ -37,7 +39,7 @@ function NavItem({
   active,
 }: {
   href?: string;
-  icon: string;
+  icon: React.ComponentProps<typeof Icon>["name"];
   label: string;
   disabled?: boolean;
   active?: boolean;
@@ -51,7 +53,7 @@ function NavItem({
         className={`${base} opacity-40 cursor-not-allowed`}
         style={{ color: "var(--muted)" }}
       >
-        <span>{icon}</span>
+        <Icon name={icon} className="h-4 w-4 shrink-0" />
         <span>{label}</span>
       </div>
     );
@@ -63,7 +65,7 @@ function NavItem({
       className={`${base} ${active ? "font-medium" : "hover:bg-white/5"}`}
       style={active ? { background: "var(--primary)18", color: "var(--primary)" } : { color: "var(--foreground)" }}
     >
-      <span>{icon}</span>
+      <Icon name={icon} className="h-4 w-4 shrink-0" />
       <span>{label}</span>
     </Link>
   );
@@ -142,7 +144,7 @@ function ChatItem({
           className="p-1 rounded hover:bg-white/10 text-xs"
           style={{ color: "var(--muted)" }}
         >
-          ✏️
+          <Icon name="edit" className="h-3.5 w-3.5" />
         </button>
         <button
           onClick={handleDelete}
@@ -150,7 +152,7 @@ function ChatItem({
           className="p-1 rounded hover:bg-red-500/10 text-xs"
           style={{ color: "var(--muted)" }}
         >
-          🗑️
+          <Icon name="trash" className="h-3.5 w-3.5" />
         </button>
       </div>
     </div>
@@ -174,13 +176,16 @@ export default function Sidebar(props: Props) {
       {/* Logo */}
       <div className="px-4 py-4 border-b shrink-0" style={{ borderColor: "var(--border)" }}>
         <Link href="/worlds" className="font-semibold tracking-tight text-sm hover:opacity-80 transition-opacity">
-          ⚔️ DM Assistant
+          <span className="inline-flex items-center gap-2">
+            <Icon name="sword" className="h-4 w-4" />
+            DM Assistant
+          </span>
         </Link>
       </div>
 
       {props.mode === "root" && (
         <nav className="flex-1 px-2 py-3 space-y-0.5">
-          <NavItem href="/worlds" icon="🌍" label="Мои миры" active />
+          <NavItem href="/worlds" icon="globe" label="Мои миры" active />
         </nav>
       )}
 
@@ -200,7 +205,7 @@ export default function Sidebar(props: Props) {
 
           {/* Nav */}
           <nav className="flex-1 px-2 py-3 space-y-0.5">
-            <NavItem icon="📚" label="Канон мира" disabled />
+            <NavItem icon="book" label="Канон мира" disabled />
           </nav>
         </>
       )}
@@ -223,12 +228,12 @@ export default function Sidebar(props: Props) {
           <nav className="px-2 py-3 space-y-0.5 border-b shrink-0" style={{ borderColor: "var(--border)" }}>
             <NavItem
               href={`/worlds/${props.worldId}/campaigns/${props.campaignId}/canon`}
-              icon="📚"
+              icon="book"
               label="Канон"
               active={pathname.endsWith("/canon")}
             />
-            <NavItem icon="⚔️" label="Конфликты" disabled />
-            <NavItem icon="💡" label="Идеи" disabled />
+            <NavItem icon="sword" label="Конфликты" disabled />
+            <NavItem icon="lightbulb" label="Идеи" disabled />
           </nav>
 
           {/* Chat list */}
